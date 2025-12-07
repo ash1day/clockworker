@@ -111,6 +111,27 @@ export async function uploadToS3(_patch?: string): Promise<void> {
 }
 
 /**
+ * 新規作成ファイルを即座にS3にアップロードしてクリア
+ */
+export async function uploadNewFilesNow(): Promise<void> {
+  const filesToUpload = getNewlyCreatedFiles()
+
+  if (filesToUpload.length === 0) {
+    return
+  }
+
+  for (const file of filesToUpload) {
+    const localPath = path.join(DATA_DIR, file)
+    if (fs.existsSync(localPath)) {
+      console.log(`  📤 Uploading ${file}...`)
+      await uploadFileToS3(localPath, file)
+    }
+  }
+
+  clearNewlyCreatedFiles()
+}
+
+/**
  * 既存のマッチIDを取得
  */
 export async function getExistingMatchIds(region: string, patch: string): Promise<Set<string>> {

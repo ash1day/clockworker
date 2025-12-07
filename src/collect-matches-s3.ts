@@ -4,7 +4,14 @@ import { MATCH_DETAIL_API_RATE_LIMIT, MATCH_LIST_API_RATE_LIMIT } from './common
 import { Players } from './common/players'
 import type { Region, Tier } from './common/types'
 import { Regions, RegionToPlatform } from './common/types'
-import { filterNewMatchIds, finalizeDataStore, initDataStore, saveMatchData, saveMatchIndex } from './s3-match-store'
+import {
+  filterNewMatchIds,
+  finalizeDataStore,
+  initDataStore,
+  saveMatchData,
+  saveMatchIndex,
+  uploadNewFilesNow
+} from './s3-match-store'
 import { gameVersionToPatchDir, patchToNumber } from './utils/patch-utils'
 import { batchGetWithFlowRestriction, createTftApi, REQUEST_BUFFER_RATE } from './utils/riot-api-utils'
 
@@ -191,9 +198,10 @@ async function collectMatchesFromRegion(
 
   const savedMatchIds = newMatches.map((m) => m.metadata.match_id)
 
-  // データを保存（既存データとマージ）
+  // データを保存してS3にアップロード
   await saveMatchData(newMatches, region, latestPatch)
   await saveMatchIndex(savedMatchIds, region, latestPatch)
+  await uploadNewFilesNow()
 
   console.log(`  Saved ${newMatches.length} new matches for ${latestPatch}`)
   const elapsed = Math.round((Date.now() - regionStart) / 1000)
