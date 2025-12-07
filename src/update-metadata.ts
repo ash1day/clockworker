@@ -3,7 +3,7 @@
  * S3の既存データからメタデータを生成・更新
  */
 
-import { HeadObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
+import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 import * as dotenv from 'dotenv'
 import { aggregateMetadata } from './metadata'
 

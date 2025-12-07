@@ -1,5 +1,4 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { formatGameVersionToPatch } from './utils/match-utils'
 
 const BUCKET_NAME = 'tftips'
 const METADATA_KEY = 'match-data/metadata.json'
@@ -87,7 +86,6 @@ export async function updateMetadata(patch: string, region: string, matchCount: 
   }
 
   // マッチ数を更新
-  const _oldCount = metadata.patches[patch].regions[region].matchCount
   metadata.patches[patch].regions[region].matchCount = matchCount
   metadata.patches[patch].regions[region].lastUpdated = new Date().toISOString()
 
