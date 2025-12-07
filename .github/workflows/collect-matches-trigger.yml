@@ -1,24 +1,19 @@
 name: Trigger Collect Matches
 
 on:
-  workflow_run:
-    workflows: ["Collect Matches (S3)"]
-    types:
-      - completed
-
-concurrency:
-  group: collect-matches-trigger
-  cancel-in-progress: true
+  schedule:
+    # 5分ごとに実行
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
-  trigger-next:
+  trigger-if-idle:
     runs-on: ubuntu-latest
     steps:
-      - name: Check if already running and trigger if not
+      - name: Trigger collect-matches if not running
         uses: actions/github-script@v7
         with:
           script: |
-            // Check for in_progress or queued runs
             const runs = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -36,7 +31,7 @@ jobs:
             const activeCount = runs.data.total_count + queuedRuns.data.total_count
 
             if (activeCount > 0) {
-              console.log(`Already ${activeCount} run(s) active/queued, skipping trigger`)
+              console.log(`Already ${activeCount} run(s) active/queued, skipping`)
               return
             }
 
@@ -46,4 +41,4 @@ jobs:
               workflow_id: 'collect-matches.yml',
               ref: 'main'
             })
-            console.log('Triggered next collect-matches run')
+            console.log('Triggered collect-matches')

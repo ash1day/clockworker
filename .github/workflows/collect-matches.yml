@@ -12,9 +12,6 @@ on:
         required: false
         default: 'all'
         type: string
-  schedule:
-    # 1日1回起動（日本時間12:00 = UTC 3:00）、そこからチェーンで回り続ける
-    - cron: '0 3 * * *'
 
 concurrency:
   group: collect-matches
