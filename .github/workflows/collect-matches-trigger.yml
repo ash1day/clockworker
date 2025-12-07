@@ -2,8 +2,8 @@ name: Trigger Collect Matches
 
 on:
   schedule:
-    # 1時間ごとに実行
-    - cron: '0 * * * *'
+    # 6時間ごとに実行
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 jobs:
