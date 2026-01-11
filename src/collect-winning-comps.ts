@@ -28,6 +28,9 @@ const TOP_PLAYERS_COUNT = 10
 // 各プレイヤーから取得する直近試合数
 const RECENT_MATCHES_COUNT = 20
 
+// 直近何時間の試合を対象にするか
+const RECENT_HOURS = 24
+
 interface WinningComp {
   region: string
   playerName: string
@@ -80,7 +83,8 @@ async function fetchWinningMatches(
   // 直近N試合のIDを取得
   let matchIds: string[] = []
   try {
-    const matchList = await api.Match.list(puuid, regionGroup, { count: RECENT_MATCHES_COUNT })
+    const startTime = Math.floor((Date.now() - RECENT_HOURS * 60 * 60 * 1000) / 1000)
+    const matchList = await api.Match.list(puuid, regionGroup, { count: RECENT_MATCHES_COUNT, startTime })
     matchIds = matchList.response
   } catch (error) {
     console.warn(`  Failed to fetch match list: ${error}`)
@@ -120,7 +124,7 @@ async function fetchWinningMatches(
 
   for (const match of matches) {
     const participant = match.info.participants.find((p) => p.puuid === puuid)
-    if (participant && participant.placement === 1) {
+    if (participant && participant.placement === 1 && participant.units.length >= 8) {
       winningComps.push({
         region,
         playerName,
