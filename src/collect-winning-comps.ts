@@ -111,7 +111,7 @@ async function fetchWinningMatches(
     if (firstParticipant) {
       const gameName = (firstParticipant as any).riotIdGameName || ''
       const tagLine = (firstParticipant as any).riotIdTagline || ''
-      playerName = gameName ? `${gameName}#${tagLine}` : 'Unknown'
+      playerName = gameName || 'Unknown'
     }
   }
 
