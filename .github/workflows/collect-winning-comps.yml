@@ -1,0 +1,44 @@
+name: Collect Winning Comps
+
+on:
+  schedule:
+    # 2時間ごとに実行
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
+
+env:
+  NODE_ENV: production
+
+jobs:
+  collect-winning-comps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('yarn.lock') }}
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: yarn install --immutable
+
+      - name: Collect winning comps
+        run: yarn collect-winning-comps
+        env:
+          RIOT_API_KEY: ${{ secrets.RIOT_API_KEY }}
+          TFTIPS_DATABASE_URL: ${{ secrets.TFTIPS_DATABASE_URL }}
