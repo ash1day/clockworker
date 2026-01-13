@@ -35,6 +35,7 @@ interface WinningComp {
   region: string
   playerName: string
   rank: number
+  lp: number
   endAt: Date
   units: Array<{ character_id: string; tier: number }>
 }
@@ -76,7 +77,8 @@ async function fetchWinningMatches(
   api: TftApi,
   puuid: string,
   region: Region,
-  rank: number
+  rank: number,
+  lp: number
 ): Promise<{ comps: WinningComp[]; playerName: string }> {
   const regionGroup = RegionToPlatform[region]
 
@@ -129,6 +131,7 @@ async function fetchWinningMatches(
         region,
         playerName,
         rank,
+        lp,
         endAt: new Date(match.info.game_datetime),
         units: participant.units.map((u) => ({
           character_id: u.character_id,
@@ -162,7 +165,7 @@ export async function collectWinningComps(): Promise<WinningComp[]> {
         const rank = i + 1
 
         // 1位試合を取得（プレイヤー名も試合データから取得）
-        const { comps, playerName } = await fetchWinningMatches(api, player.puuid, region, rank)
+        const { comps, playerName } = await fetchWinningMatches(api, player.puuid, region, rank, player.leaguePoints)
         allWinningComps.push(...comps)
 
         logWithTime(`  [${rank}] ${playerName} (${player.leaguePoints} LP) - ${comps.length} wins`)
@@ -198,9 +201,9 @@ export async function saveWinningCompsToDb(winningComps: WinningComp[]): Promise
     // INSERT
     for (const comp of winningComps) {
       await pool.query(
-        `INSERT INTO winning_comps (region, player_name, rank, end_at, units)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [comp.region, comp.playerName, comp.rank, comp.endAt, JSON.stringify(comp.units)]
+        `INSERT INTO winning_comps (region, player_name, rank, lp, end_at, units)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [comp.region, comp.playerName, comp.rank, comp.lp, comp.endAt, JSON.stringify(comp.units)]
       )
     }
 
